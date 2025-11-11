@@ -1,0 +1,19 @@
+# 仮想環境
+myenv/
+
+# Pythonのキャッシュファイル
+__pycache__/
+*.pyc
+
+# シミュレーション結果 (全ての results/ フォルダを無視)
+**/results/
+
+# (任意) 入力データ (巨大な場合)
+**/data/
+*.dat
+
+# (macOS)
+.DS_Store
+
+# (VSCode)
+.vscode/
