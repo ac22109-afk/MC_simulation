@@ -10,17 +10,15 @@
 
 cd $PJM_O_WORKDIR
 
-# --- moduleのロード（仮想環境の前に） ---
+# --- module ---
 source /etc/profile.d/modules.sh
 module use /work/opt/local/modules/modulefiles/LN/odyssey/compiler
 
-# システムのNumPyが利用可能なPythonモジュールをロード（必要に応じて）
-# module load python/3.6.8  # もしモジュールがあれば
+# NumPy Python
+# module load python/3.6.8
 
-# --- 仮想環境のアクティベート ---
 VENV_PATH="/work/02/gn29/n29001/MC_simulation/.venv"
 if [ -f "${VENV_PATH}/bin/activate" ]; then
-    # システムパッケージへのアクセスを許可
     export PYTHONNOUSERSITE=0
     source ${VENV_PATH}/bin/activate
     echo "Virtual environment activated: ${VENV_PATH}"
@@ -29,56 +27,52 @@ else
     exit 1
 fi
 
-# --- Python実行ファイルの設定 ---
-# 仮想環境のpythonを明示的に指定
 py="${VENV_PATH}/bin/python"
 
 lmp="/work/02/gn29/n29001/bin/lmp_mpi"
 
 export LAMMPSPATH=/work/02/gn29/n29001/bin/lmp_mpi:$LAMMPSPATH
 
-# --- ディレクトリパスの設定 ---
-# PJM_O_WORKDIR は /.../run/caseA を指します
-SRC_DIR="$PJM_O_WORKDIR/../../src" # srcディレクトリへのパス（絶対パス化）
-MODULE_DIR="/work/02/gn29/n29001/opt/modules" # 外部モジュールディレクトリ
+SRC_DIR="$PJM_O_WORKDIR/../../src"
+MODULE_DIR="/work/02/gn29/n29001/opt/modules"
 
-# システムのNumPyパスを追加（Wisteriaの場合）
 SYSTEM_NUMPY_PATH="/usr/lib64/python3.6/site-packages"
 
-# Pythonモジュール検索パスの設定
-# - SRC_DIR: sc2_unit.so, sc4_unit.so などのプロジェクト固有モジュール用
-# - MODULE_DIR: m_vasp_dc_368 などの共通ユーティリティモジュール用
-# - SYSTEM_NUMPY_PATH: システムのNumPyを使用
+
 export PYTHONPATH="${SRC_DIR}:${MODULE_DIR}:${SYSTEM_NUMPY_PATH}:${PYTHONPATH}"
 
-echo "=== Debug Info ==="
-echo "HOST: $(hostname)"
-echo "PWD : $(pwd)"
-echo "VENV: ${VENV_PATH}"
-echo "SRC_DIR: ${SRC_DIR}"
-echo "MODULE_DIR: ${MODULE_DIR}"
-echo "PYTHONPATH: ${PYTHONPATH}"
-echo "--- SRC_DIR contents ---"
-ls -la ${SRC_DIR} 2>&1 || echo "SRC_DIR not found"
-echo "--- MODULE_DIR contents ---"
-ls -la ${MODULE_DIR} 2>&1 || echo "MODULE_DIR not found"
-echo "--------------------------------"
-echo "Target Python (\$py): $py"
-echo "Which Python: $(which python)"
-echo "--- Versions ---"
-$py --version
-$py -c "import numpy; print(f'NumPy Version: {numpy.__version__}')" || echo "NumPy not found in $py"
-$py -c "import sys; print(f'Actual Executable: {sys.executable}')"
-echo "=================="
+# Debug
+hasDebug=#True
+
+if [ "${hasDebug}" == "True" ];then
+	echo "=== Debug Info ==="
+	echo "HOST: $(hostname)"
+	echo "PWD : $(pwd)"
+	echo "VENV: ${VENV_PATH}"
+	echo "SRC_DIR: ${SRC_DIR}"
+	echo "MODULE_DIR: ${MODULE_DIR}"
+	echo "PYTHONPATH: ${PYTHONPATH}"
+	echo "--- SRC_DIR contents ---"
+	ls -la ${SRC_DIR} 2>&1 || echo "SRC_DIR not found"
+	echo "--- MODULE_DIR contents ---"
+	ls -la ${MODULE_DIR} 2>&1 || echo "MODULE_DIR not found"
+	echo "--------------------------------"
+	echo "Target Python (\$py): $py"
+	echo "Which Python: $(which python)"
+	echo "--- Versions ---"
+	$py --version
+	$py -c "import numpy; print(f'NumPy Version: {numpy.__version__}')" || echo "NumPy not found in $py"
+	$py -c "import sys; print(f'Actual Executable: {sys.executable}')"
+	echo "=================="
+	# Test Python imports before starting main calculation
+	echo "=== Testing Python imports ==="
+	$py -c "import sc2_unit; from m_vasp_dc_368 import VaspPOSCAR; print('Import successful')"
+	$py -c "import sc2_unit; import sc4_unit; print('Import successful')"
+	echo "=============================="
+fi
 
 ## --- params
 n_mc_steps=10000
-
-# Test Python imports before starting main calculation
-echo "=== Testing Python imports ==="
-$py -c "import sc2_unit; from m_vasp_dc_368 import VaspPOSCAR; print('Import successful')"
-$py -c "import sc2_unit; import sc4_unit; print('Import successful')"
-echo "=============================="
 
 if [ -f .tmp ]; then
 	rm .tmp
@@ -110,6 +104,14 @@ if [ ! -d vac_structures ] && [ -d results/vac_structures ]; then
 	ln -s results/vac_structures vac_structures
 fi
 
+# read config.ini 
+CONFIG_FILE="../../config.ini"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Error: Config file '$CONFIG_FILE' not found"
+    exit 1
+fi
+
 ## --- files
 FNLOG="all.log"
 echo "Start calculations" > $FNLOG
@@ -138,7 +140,7 @@ for i in `seq 1 $n_mc_steps`; do
 	echo $info >> $FNLOG
 
 	## --- swap atoms
-	$py $SRC_DIR/sc4.py >> $FNLOG 
+	$py $SRC_DIR/sc4.py "$CONFIG_FILE" >> $FNLOG 
 
 	# --- run minimize lammps
 	if [ $j -eq 0 ]; then
@@ -154,7 +156,7 @@ for i in `seq 1 $n_mc_steps`; do
 	# cp curr_step/struct_opt.lmp interm/struct_opt_$i.lmp
 
 	## --- compare E
-	$py $SRC_DIR/sc2.py $i >> $FNLOG
+	$py $SRC_DIR/sc2.py $i "$CONFIG_FILE" >> $FNLOG
 done
 
 # ============== rename _curr to _zero ==================

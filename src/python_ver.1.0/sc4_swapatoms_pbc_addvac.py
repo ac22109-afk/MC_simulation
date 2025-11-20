@@ -1,24 +1,30 @@
 #!/usr/bin/env python
 
-#from symbol import atom
-# import sys
-# sys.path.append("04_pbc_gr/modules")
-
-import sys
-sys.path.append("/work/02/gn29/n29001/opt/modules/")
-
+import configparser
 from m_vasp_dc_368 import VaspPOSCAR
-
-from random import randint
+import randint
 import random
 import numpy as np
-
 from m_geom import prepare_box,\
                    v_in_peridoc_box
+				   
+#read config.ini
+config_path = '../../config.ini'
+if len(sys.argv) > 1:
+    config_path = sys.argv[1]
 
-FN_CURR  = "struct_curr_g.lmp"
-FN_NEW_G = "struct_new_g.lmp"
-FN_NEW   = "curr_step/struct.lmp"
+config = configparser.ConfigParser()
+if not os.path.exists(config_path):
+    print(f"Error: Config file '{config_path}' not found")
+    sys.exit(1)
+config.read(config_path)
+
+import sys
+sys.path.append(config['paths']['module_path'])
+
+FN_CURR  = config['files_sc4']['fn_curr']
+FN_NEW_G = config['files_sc4']['fn_new_g']
+FN_NEW   = config['files_sc4']['fn_new']
 
 GHOST_TYPEID = "4"
 
