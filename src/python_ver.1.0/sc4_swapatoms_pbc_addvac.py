@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-
+import sys
+import os
 import configparser
 from m_vasp_dc_368 import VaspPOSCAR
-import randint
 import random
+from random import randint
 import numpy as np
 from m_geom import prepare_box,\
                    v_in_peridoc_box

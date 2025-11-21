@@ -1,0 +1,35 @@
+
+atom_style     atomic
+units              metal
+boundary        p p p
+
+read_data       struct.lmp
+
+pair_style      aenet/cc
+pair_coeff      * * v03 Al Mg Si 10sw-10sw.ann Al Mg Si
+
+neighbor        0.5 bin
+
+thermo_style    custom step etotal  press  fmax
+thermo          10
+
+variable        energy equal etotal
+variable        s      equal step
+variable        fm     equal fmax
+
+print "==========================================================="
+print "Only atoms minimize"
+print "==========================================================="
+
+minimize        1.0e-8 1.0e-3 1000 1000
+
+fix             fout1 all print 1 "  new E  ${energy}" file ../data_new_E
+fix             f1 all nve
+run             0
+
+write_data      struct_opt.lmp
+
+
+print "==========================================================="
+print "LAMMPS ALL FINISHED WELL"
+print "==========================================================="
