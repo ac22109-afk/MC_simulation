@@ -1,8 +1,8 @@
 LAMMPS (2 Aug 2023)
   using 1 OpenMP thread(s) per MPI task
 
-atom_style     atomic
-units              metal
+atom_style      atomic
+units           metal
 boundary        p p p
 
 read_data       struct.lmp
@@ -34,7 +34,12 @@ Only atoms minimize
 print "==========================================================="
 ===========================================================
 
-minimize        1.0e-8 1.0e-3 1000 1000
+# dump          myDump all atom 1 dumps/dump_${suff}.atoms
+# minimize      1.0e-3 1.0e-3 10000 10000
+
+fix             fout1 all print 1 "  new E  ${energy}" file ../data_new_E
+fix             f1 all nve
+run             0
 Neighbor list info ...
   update: every = 1 steps, delay = 0 steps, check = yes
   max neighbors/atom: 2000, page size: 100000
@@ -47,58 +52,13 @@ Neighbor list info ...
       pair build: full/bin/atomonly
       stencil: full/bin/3d
       bin: standard
-Per MPI rank memory allocation (min/avg/max) = 4.086 | 4.086 | 4.086 Mbytes
-   Step         TotEng         Press           Fmax     
-         0  -3236.9547      20992.373      6.7169592    
-        10  -3237.2594      21040.953      6.1995012    
-        19  -3237.2992      21039.123      1.0128868    
-Loop time of 1.1493 on 144 procs for 19 steps with 869 atoms
-
-99.9% CPU use with 144 MPI tasks x 1 OpenMP threads
-
-Minimization stats:
-  Stopping criterion = energy tolerance
-  Energy initial, next-to-last, final = 
-     -3236.95468154267  -3237.29922572409  -3237.29924998297
-  Force two-norm initial, final = 11.411967 1.8538358
-  Force max component initial, final = 6.7169592 1.0128868
-  Final line search alpha, max atom move = 6.6317039e-05 6.7171655e-05
-  Iterations, force evaluations = 19 228
-
-MPI task timing breakdown:
-Section |  min time  |  avg time  |  max time  |%varavg| %total
----------------------------------------------------------------
-Pair    | 0.25032    | 0.57385    | 1.1212     |  18.7 | 49.93
-Neigh   | 0          | 0          | 0          |   0.0 |  0.00
-Comm    | 0.023898   | 0.52239    | 0.86183    |  24.7 | 45.45
-Output  | 4.242e-05  | 4.3226e-05 | 4.503e-05  |   0.0 |  0.00
-Modify  | 0          | 0          | 0          |   0.0 |  0.00
-Other   |            | 0.05302    |            |       |  4.61
-
-Nlocal:        6.03472 ave          12 max           3 min
-Histogram: 3 20 26 52 21 15 3 2 0 2
-Nghost:        502.174 ave         517 max         469 min
-Histogram: 5 17 2 0 2 13 11 19 41 34
-Neighs:              0 ave           0 max           0 min
-Histogram: 144 0 0 0 0 0 0 0 0 0
-FullNghs:      779.111 ave        1608 max         340 min
-Histogram: 5 19 30 50 20 13 3 2 0 2
-
-Total # of neighbors = 112192
-Ave neighs/atom = 129.10472
-Neighbor list builds = 0
-Dangerous builds = 0
-
-fix             fout1 all print 1 "  new E  ${energy}" file ../data_new_E
-fix             f1 all nve
-run             0
-  new E  -3237.29924998297
+  new E  -3239.47186985204
 Per MPI rank memory allocation (min/avg/max) = 2.961 | 2.961 | 2.961 Mbytes
    Step         TotEng         Press           Fmax     
-        19  -3237.2992      21039.123      1.0128868    
-Loop time of 7.20903e-06 on 144 procs for 0 steps with 869 atoms
+         0  -3239.4719      21619.845      246.50216    
+Loop time of 6.86597e-06 on 144 procs for 0 steps with 869 atoms
 
-85.3% CPU use with 144 MPI tasks x 1 OpenMP threads
+29.2% CPU use with 144 MPI tasks x 1 OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
@@ -108,19 +68,19 @@ Neigh   | 0          | 0          | 0          |   0.0 |  0.00
 Comm    | 0          | 0          | 0          |   0.0 |  0.00
 Output  | 0          | 0          | 0          |   0.0 |  0.00
 Modify  | 0          | 0          | 0          |   0.0 |  0.00
-Other   |            | 7.209e-06  |            |       |100.00
+Other   |            | 6.866e-06  |            |       |100.00
 
 Nlocal:        6.03472 ave          12 max           3 min
-Histogram: 3 19 28 51 20 17 2 2 0 2
-Nghost:        502.174 ave         517 max         469 min
-Histogram: 5 17 2 0 2 13 11 19 40 35
+Histogram: 3 19 28 52 19 16 3 2 0 2
+Nghost:        502.139 ave         518 max         467 min
+Histogram: 5 18 1 0 2 14 10 19 40 35
 Neighs:              0 ave           0 max           0 min
 Histogram: 144 0 0 0 0 0 0 0 0 0
-FullNghs:      778.903 ave        1608 max         339 min
-Histogram: 4 18 32 50 19 15 2 2 0 2
+FullNghs:      779.333 ave        1608 max         341 min
+Histogram: 4 19 31 50 19 14 3 2 0 2
 
-Total # of neighbors = 112162
-Ave neighs/atom = 129.0702
+Total # of neighbors = 112224
+Ave neighs/atom = 129.14154
 Neighbor list builds = 0
 Dangerous builds = 0
 
@@ -134,4 +94,4 @@ print "LAMMPS ALL FINISHED WELL"
 LAMMPS ALL FINISHED WELL
 print "==========================================================="
 ===========================================================
-Total wall time: 0:00:01
+Total wall time: 0:00:00
