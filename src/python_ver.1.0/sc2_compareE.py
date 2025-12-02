@@ -2,19 +2,32 @@ from shutil import copyfile
 from math import exp
 from random import random
 from sys import argv
-
-# import sys
-# sys.path.append("04_pbc_gr/modules")
 import sys
-sys.path.append("/work/02/gn29/n29001/opt/modules/")
+import configparser
+import os
 
-FN_CURR = "data_curr_E"
-FN_NEW = "data_new_E"
-FN_OUT = "output_E"
-ST_CURR_G = "struct_curr_g.lmp"
-ST_NEW_G = "struct_new_g.lmp"
-ST_OPT = "curr_step/struct_opt.lmp"
-ST_CURR = "struct_curr.lmp"
+# read config.ini(file,path info)
+config_path = '../../config.ini'
+if len(argv) > 2: 
+    config_path = argv[2] #argv[1] mean step id,argv[2] mean config
+
+config = configparser.ConfigParser()
+if not os.path.exists(config_path):
+    print(f"Error: Config file '{config_path}' not found")
+    sys.exit(1)
+config.read(config_path)
+
+# module path
+sys.path.append(config['paths']['module_path'])
+
+FN_CURR = config['files_sc2']['fn_curr']
+FN_NEW = config['files_sc2']['fn_new']
+FN_OUT = config['files_sc2']['fn_out']
+ST_CURR_G = config['files_sc2']['st_curr_g']
+ST_NEW_G = config['files_sc2']['st_new_g']
+ST_OPT = config['files_sc2']['st_opt']
+ST_CURR = config['files_sc2']['st_curr']
+#if you wanna change file path,edit config
 
 T_Kelbin = 298
 

@@ -1,0 +1,13 @@
+LAMMPS (2 Aug 2023)
+  using 1 OpenMP thread(s) per MPI task
+
+atom_style     atomic
+units              metal
+boundary        p p p
+
+read_data       struct.lmp
+Reading data file ...
+  orthogonal box = (0 0 0) to (32.933498 21.044417 24.801084)
+  6 by 4 by 6 MPI processor grid
+ERROR: Invalid format in Masses section of data file:  (../read_data.cpp:1978)
+Last command: read_data       struct.lmp
